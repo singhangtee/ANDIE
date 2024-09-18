@@ -1,0 +1,21 @@
+# ignore generated artefacts
+bin/
+build/
+doc/
+
+# ignore VSCode settings
+.vscode/settings.json
+
+# ignore gradle caches
+.gradle/
+
+# ignore other garbage that often ends up in the project folder
+*.zip
+*.tgz
+*.tar.gz
+*.class
+*.jar
+.DS_Store
+
+# Don't ignore gradle wrapper JAR
+!gradle-wrapper.jar

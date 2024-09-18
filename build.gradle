@@ -1,0 +1,171 @@
+plugins {
+    id "application";
+}
+
+def defaultMainClassName = "cosc202.andie.Andie";
+
+application {
+    mainClass = project.hasProperty("mainClass") ? project.getProperty("mainClass") : defaultMainClassName;
+}
+
+repositories {
+    mavenCentral();
+}
+
+// use a project layout that is compatible with the standard VS Code java extension
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src']
+
+        }
+        java{
+            srcDirs = ['src']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['test']
+        }
+        resources {
+            srcDirs = ['src/test/resources']
+        }
+    }
+}
+
+// compileJava.doLast {
+
+//     copy {
+//         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//         from "src"
+//         include "**/*.properties"
+//         into "$buildDir/classes/java/main"
+//     }
+// }
+
+// processResources {
+//     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+
+//     // resources outside of the default 'main' sourceSet are not processed by default
+//     from(project.sourceSets.main.java.srcDirs) {
+//         include "**/*.properties"
+//     }
+// }
+
+dependencies {
+    testImplementation group: "org.junit.jupiter", name: "junit-jupiter", version: "5.10.2"
+}
+
+test {
+    useJUnitPlatform();
+}
+
+run {
+    standardInput = System.in;
+}
+
+/* convenience tasks for working with a project */
+
+tasks.register("createMissingSourceDirs") {
+    group = "Project";
+    description = "Create all of the missing source directories for this project.";
+    doFirst {
+        sourceSets.each { def sourceRoot ->
+            sourceRoot.allSource.srcDirTrees.each { def sourceDir ->
+                if(!sourceDir.dir.exists()) {
+                    println "Creating source ${sourceDir}";
+                    mkdir sourceDir.dir;
+                }
+            }
+        }
+    }
+}
+
+tasks.register("deleteEmptySourceDirs") {
+    group = "Project";
+    description = "Delete empty source directories.";
+    doFirst {
+        sourceSets.each { def sourceRoot ->
+            sourceRoot.allSource.srcDirTrees.each { def sourceDir ->
+                if(sourceDir.dir.exists() && sourceDir.dir.isDirectory() && sourceDir.dir.list().length == 0) {
+                    println "Removing empty source ${sourceDir}";
+                    sourceDir.dir.delete();
+                }
+            }
+        }
+    }
+}
+
+tasks.register("openProjectDir") {
+    group = "Project";
+    description = "Open the project directory in the system file manager.";
+    doFirst {
+        println("Opening: " + file(projectDir));
+        java.awt.Desktop.getDesktop().open(file(projectDir));
+    }
+}
+
+tasks.register("openBuildDir") {
+    group = "Project";
+    description = "Open the project build directory in the system file manager.";
+    doFirst {
+        println("Opening: " + file(buildDir));
+        java.awt.Desktop.getDesktop().open(file(buildDir));
+    }
+}
+
+tasks.register("createGitIgnore") {
+    group = "Project";
+    description = "Create the project's .gitignore file.";
+
+    def gitIgnored="""
+        .gradle/
+        .nb-gradle/
+        .settings/
+        nbproject/
+        build/
+        bin/
+        dist/
+        tmp/
+        .classpath
+        .project
+        *.zip
+        *.tgz
+        *.tar.gz
+        *.class
+        *.jar
+        .DS_Store
+        !gradle-wrapper.jar
+        """;
+
+    doLast {
+        def file = new File(projectDir, ".gitignore");
+        if ( !file.exists() ) {
+            println("Creating .gitignore");
+
+            gitIgnored.lines().each { f ->
+                if(!f.trim().isBlank()) {
+                    file.append(f.trim()+"\n");
+                }
+            }
+
+        } else {
+            println(".gitignore already exists");
+        }
+    }
+
+}
+
+tasks.register("info") { 
+    group = "Project";
+    description = "Show version and location information for Java, Gradle, and project.";
+    doLast { 
+        println "Java Version: " + org.gradle.internal.jvm.Jvm.current();
+        println "Java Home: " + org.gradle.internal.jvm.Jvm.current().getJavaHome();
+        println "Gradle Version: ${gradle.gradleVersion}";
+        println "Gradle Home: ${gradle.gradleHomeDir}";
+        println "Gradle User Home: ${gradle.gradleUserHomeDir}";
+        println "Project Location: ${projectDir}";
+        println "Project Build Location: ${buildDir}";
+    }
+}
