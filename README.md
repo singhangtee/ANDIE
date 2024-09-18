@@ -97,4 +97,3 @@ Testing occured throughout the process of implementing features as well as sever
 
 ## Code Refactoring
 ANDIE now opens to the size of the users screen instead of a smaller view and many of the original exit cases in error handling have been replaced with pop-up messages. There were also a couple of extra getter and setter methods added to the orginial code. Additionally the ANDIE frame now requests focus often so the keyboard shortcuts will work. Otherwise pretty much every other feature was built on top of existing ANDIE code.
-# ANDIE
